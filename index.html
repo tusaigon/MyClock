@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đồng hồ Kim & Báo thức</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column; /* Xếp đồng hồ và bộ báo thức theo chiều dọc */
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: #f0f0f0;
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+/* KHUNG ĐỒNG HỒ */
+    .clock {
+      width: 300px;
+      height: 300px;
+      border: 20px solid black;
+      border-radius: 50%;
+      position: relative;
+      padding: 20px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+      background: white;
+      margin-bottom: 20px; /* Tạo khoảng cách với hộp báo thức */
+    }
+    .clock-face {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transform: translateY(-3px); 
+      background-image: url('https://github.com/thanhletan55-bot/MyAnalogClock/raw/refs/heads/main/Peppy2026.jpg'); /* Thay ảnh của bạn ở đây */
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
+      border-radius: 50%;
+    }
+
+        /* CSS CÁC KIM */
+        .hand {
+            background: black;
+            position: absolute;
+            top: 50%;
+            right: 50%; 
+            transform-origin: 100%; 
+            transform: rotate(90deg);
+            transition: all 0.05s;
+            transition-timing-function: cubic-bezier(0.1, 2.7, 0.58, 1);
+            border-radius: 4px;
+        }
+
+        .hour-hand { 
+            width: 30%;   
+            height: 10px;  
+            background: green; 
+            margin-top: -5px; 
+        }
+
+        .minute-hand { 
+            width: 45%;   
+            height: 6px;   
+            margin-top: -3px; 
+        }
+
+        .second-hand { 
+            width: 48%; 
+            height: 3px; 
+            background: red; 
+            margin-top: -1.5px; 
+        }
+
+        /* CSS CÁC SỐ */
+        .number {
+            position: absolute;
+            font-size: 24px;
+            transform: translate(-50%, -50%);
+            font-weight: bold;
+        }
+        .number1  { top: 12%; left: 72%; }
+        .number2  { top: 28%; left: 88%; }
+        .number3  { top: 50%; left: 95%; }
+        .number4  { top: 73%; left: 89%; }
+        .number5  { top: 89%; left: 73%; }
+        .number6  { top: 95%; left: 50%; }
+        .number7  { top: 89%; left: 28%; }
+        .number8  { top: 73%; left: 11%; }
+        .number9  { top: 50%; left: 5%; }
+        .number10 { top: 30%; left: 12%; }
+        .number11 { top: 12%; left: 28%; }
+        .number12 { top: 5%; left: 50%; }
+
+        /* KHUNG CHỮ NHẬT BÁO THỨC */
+        .alarm-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 320px;
+        }
+
+        .alarm-inputs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .alarm-inputs select {
+            padding: 8px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 70px;
+        }
+
+        .btn {
+            padding: 10px 15px;
+            font-size: 14px;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            transition: background 0.2s;
+        }
+
+        .btn-set { background-color: #4CAF50; color: white; }
+        .btn-set:hover { background-color: #45a049; }
+
+        .btn-stop { background-color: #f44336; color: white; display: none; } /* Mặc định ẩn nút tắt chuông */
+        .btn-stop:hover { background-color: #da190b; }
+
+        .alarm-status {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #555;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="clock">
+        <div class="clock-face">
+            <div class="number number1">1</div>
+            <div class="number number2">2</div>
+            <div class="number number3">3</div>
+            <div class="number number4">4</div>
+            <div class="number number5">5</div>
+            <div class="number number6">6</div>
+            <div class="number number7">7</div>
+            <div class="number number8">8</div>
+            <div class="number number9">9</div>
+            <div class="number number10">10</div>
+            <div class="number number11">11</div>
+            <div class="number number12">12</div>
+            
+            <div class="hand hour-hand" id="hour-hand"></div>
+            <div class="hand minute-hand" id="minute-hand"></div>
+            <div class="hand second-hand" id="second-hand"></div>
+        </div>
+    </div>
+
+    <div class="alarm-container">
+        <h3>Hẹn Giờ Báo Thức</h3>
+        <div class="alarm-inputs">
+            <select id="alarm-hour">
+                <option value="" disabled selected>Giờ</option>
+            </select>
+            <select id="alarm-minute">
+                <option value="" disabled selected>Phút</option>
+            </select>
+        </div>
+        <button class="btn btn-set" onclick="setAlarm()">Đặt Báo Thức</button>
+        <button class="btn btn-stop" id="stop-btn" onclick="stopAlarm()">Tắt Chuông</button>
+        <div class="alarm-status" id="alarm-status">Chưa đặt báo thức</div>
+    </div>
+/*====================================================================*/
+    <audio id="alarm-audio" src="https://github.com/thanhletan55-bot/MyAnalogClock/raw/refs/heads/main/chucngungonlop2.mp3" loop></audio>
+
+    <script>
+        // Tự động tạo danh sách 00-23 giờ và 00-59 phút vào ô Select
+        const hourSelect = document.getElementById('alarm-hour');
+        const minuteSelect = document.getElementById('alarm-minute');
+
+        for (let i = 0; i < 24; i++) {
+            let hr = i < 10 ? '0' + i : i;
+            hourSelect.options[hourSelect.options.length] = new Option(hr, hr);
+        }
+        for (let i = 0; i < 60; i++) {
+            let min = i < 10 ? '0' + i : i;
+            minuteSelect.options[minuteSelect.options.length] = new Option(min, min);
+        }
+
+        // Biến lưu trữ thời gian báo thức đã đặt
+        let alarmTime = null;
+        const alarmAudio = document.getElementById('alarm-audio');
+        const stopBtn = document.getElementById('stop-btn');
+        const alarmStatus = document.getElementById('alarm-status');
+
+        // HÀM CHẠY ĐỒNG HỒ (Cập nhật mỗi giây)
+        function setClock() {
+            const now = new Date();
+            const seconds = now.getSeconds();
+            const minutes = now.getMinutes();
+            const hours = now.getHours();
+
+            // Tính góc xoay kim
+            const secondDeg = ((seconds / 60) * 360) + 90;
+            const minuteDeg = ((minutes / 60) * 360) + ((seconds / 60) * 6) + 90;
+            const hourDeg = ((hours / 12) * 360) + ((minutes / 60) * 30) + 90;
+
+            document.getElementById("second-hand").style.transform = `rotate(${secondDeg}deg)`;
+            document.getElementById("minute-hand").style.transform = `rotate(${minuteDeg}deg)`;
+            document.getElementById("hour-hand").style.transform = `rotate(${hourDeg}deg)`;
+
+            // KIỂM TRA BÁO THỨC
+            // Định dạng thời gian hiện tại thành chuỗi "HH:MM" để so sánh
+            let currentHour = hours < 10 ? '0' + hours : hours;
+            let currentMinute = minutes < 10 ? '0' + minutes : minutes;
+            let currentTime = `${currentHour}:${currentMinute}`;
+
+            if (alarmTime === currentTime) {
+                playAlarm();
+            }
+        }
+
+        // HÀM ĐẶT BÁO THỨC
+        function setAlarm() {
+            const selectedHour = hourSelect.value;
+            const selectedMinute = minuteSelect.value;
+
+            if (selectedHour === "" || selectedMinute === "") {
+                alert("Vui lòng chọn đầy đủ Giờ và Phút!");
+                return;
+            }
+
+            alarmTime = `${selectedHour}:${selectedMinute}`;
+            alarmStatus.innerText = `Đã hẹn giờ lúc: ${alarmTime}`;
+            alarmStatus.style.color = "#4CAF50";
+        }
+
+        // HÀM KÍCH HOẠT CHUÔNG
+        function playAlarm() {
+            alarmAudio.play();
+            stopBtn.style.display = "inline-block"; // Hiện nút tắt chuông
+            alarmStatus.innerText = "⏰ ĐẾN GIỜ RỒI!!! ⏰";
+            alarmStatus.style.color = "#f44336";
+        }
+
+        // HÀM TẮT CHUÔNG
+        function stopAlarm() {
+            alarmAudio.pause();
+            alarmAudio.currentTime = 0; // Reset nhạc về từ đầu
+            stopBtn.style.display = "none"; // Ẩn nút tắt chuông
+            alarmTime = null; // Hủy khung giờ đã hẹn để không lặp lại
+            alarmStatus.innerText = "Chưa đặt báo thức";
+            alarmStatus.style.color = "#555";
+            hourSelect.value = ""; // Reset ô chọn
+            minuteSelect.value = "";
+        }
+
+        setInterval(setClock, 1000);
+        setClock();
+    </script>
+</body>
+</html>
